@@ -1,0 +1,4 @@
+/rift
+*.o
+*.swp
+.nanobot-lock
