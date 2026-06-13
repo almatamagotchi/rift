@@ -17,6 +17,7 @@ SRCS += $(SRC_DIR)/input.c
 SRCS += $(SRC_DIR)/pty.c
 SRCS += $(SRC_DIR)/bar.c
 SRCS += $(SRC_DIR)/snap.c
+SRCS += $(SRC_DIR)/term.c
 
 OBJS  = $(SRCS:.c=.o)
 

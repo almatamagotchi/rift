@@ -10,6 +10,7 @@ struct Window {
     Rect    inner;         /* client area */
     WinState state;
     Pty    *pty;           /* null for non-terminal windows */
+    Term   *term;          /* terminal buffer (null if no pty) */
     bool    visible;
     bool    focused;
     int     z;             /* stacking order */

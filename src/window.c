@@ -11,7 +11,6 @@ static int     win_z_top     = 0;
 
 Window *win_create(const char *title, int x, int y, int w, int h, const char *cmd)
 {
-    (void)cmd;
     Window *win = calloc(1, sizeof(Window));
     if (!win) return NULL;
 
@@ -24,6 +23,12 @@ Window *win_create(const char *title, int x, int y, int w, int h, const char *cm
     win->state  = WIN_NORMAL;
     win->visible = true;
     win->z       = ++win_z_top;
+
+    /* allocate term buffer and spawn pty if a command is given */
+    if (cmd && *cmd) {
+        win->pty = pty_spawn(cmd, w, h);
+        win->term = term_create(w, h);
+    }
 
     /* insert at head of list */
     win->next = win_list;
@@ -40,6 +45,7 @@ void win_destroy(Window *win)
     if (win == focused_win) focused_win = NULL;
 
     if (win->pty) pty_destroy(win->pty);
+    if (win->term) term_destroy(win->term);
 
     if (win->prev) win->prev->next = win->next;
     if (win->next) win->next->prev = win->prev;
@@ -105,6 +111,7 @@ void win_resize(Window *win, int dw, int dh, bool from_corner)
     win->inner.w = win->rect.w;
     win->inner.h = win->rect.h;
     if (win->pty) pty_resize(win->pty, win->inner.w, win->inner.h);
+    if (win->term) term_resize(win->term, win->inner.w, win->inner.h);
 }
 
 void win_raise(Window *win)

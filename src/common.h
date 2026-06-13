@@ -62,11 +62,13 @@ typedef enum {
 typedef struct Window Window;
 typedef struct Pty Pty;
 typedef struct Bar Bar;
+typedef struct Term Term;
 
 #include "window.h"
 #include "pty.h"
 #include "bar.h"
 #include "snap.h"
+#include "term.h"
 
 /* platform abstraction */
 int  plat_init(void);
@@ -81,6 +83,40 @@ void plat_putch(int ch);
 void plat_puts(const char *s);
 void plat_attr(int fg, int bg, int flags);
 void plat_clear(void);
+
+/* key codes (above ASCII range to avoid collision with text bytes) */
+#define K_F1       (256+1)
+#define K_F2       (256+2)
+#define K_F3       (256+3)
+#define K_F4       (256+4)
+#define K_F5       (256+5)
+#define K_F6       (256+6)
+#define K_F7       (256+7)
+#define K_F8       (256+8)
+#define K_F9       (256+9)
+#define K_F10      (256+10)
+#define K_F11      (256+11)
+#define K_F12      (256+12)
+#define K_UP       (256+20)
+#define K_DOWN     (256+21)
+#define K_RIGHT    (256+22)
+#define K_LEFT     (256+23)
+#define K_HOME     (256+24)
+#define K_END      (256+25)
+#define K_PGUP     (256+26)
+#define K_PGDN     (256+27)
+#define K_INS      (256+28)
+#define K_DEL      (256+29)
+#define K_BSP      (256+30)
+#define K_ENTER    (256+31)
+#define K_ESC      (256+32)
+#define K_TAB      (256+33)
+
+/* modifier masks */
+#define MOD_SHIFT  1
+#define MOD_ALT    2
+#define MOD_CTRL   4
+#define MOD_META   8
 
 /* input event types */
 typedef enum {
