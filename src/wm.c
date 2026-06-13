@@ -13,6 +13,9 @@ static int g_cols, g_rows;
 static int running = 1;
 static Window *g_shell = NULL;  /* primary shell window */
 
+/* input parser (from input.c) */
+int input_parse(const char *buf, int len, Event *out, int max_events);
+
 static void sig_handler(int sig)
 {
     (void)sig;
@@ -63,8 +66,13 @@ int main(int argc, char *argv[])
 
         int n = plat_read_input(inbuf, sizeof(inbuf));
         if (n > 0) {
-            /* TODO: parse input into Events, dispatch to wm_handle_event */
-            (void)n;
+            /* parse input and dispatch to focused window */
+            #define MAX_EVENTS 16
+            Event events[MAX_EVENTS];
+            int nev = input_parse(inbuf, n, events, MAX_EVENTS);
+            for (int i = 0; i < nev; i++) {
+                wm_handle_event(&events[i]);
+            }
         }
 
         wm_render();
@@ -83,7 +91,7 @@ int main(int argc, char *argv[])
 int wm_init(int cols, int rows)
 {
     /* create initial shell window filling the screen */
-    g_shell = win_create("shell", 0, 0, cols, rows, NULL);
+    g_shell = win_create("shell", 0, 0, cols, rows, "/bin/sh");
     if (!g_shell) return -1;
     win_focus(g_shell);
     return 0;
