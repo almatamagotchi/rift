@@ -23,6 +23,7 @@ OBJS  = $(SRCS:.c=.o)
 ifeq ($(platform),linux)
     SRCS  += $(PLAT_DIR)/linux.c
     CFLAGS += -DRIFT_PLATFORM_LINUX
+    LDFLAGS += -lutil
     # GPM mouse support (optional)
     ifneq ($(findstring gpm,$(MAKECMDGOALS)),)
         CFLAGS += -DRIFT_GPM
