@@ -104,6 +104,34 @@ void wm_shutdown(void)
     }
 }
 
+/* write a string to a PTY */
+static void pty_write_str(Pty *pty, const char *s)
+{
+    pty_write(pty, s, strlen(s));
+}
+
+/* send ANSI CSI sequence: ESC [ <optional param> <letter>
+ * format with modifiers: ESC [ 1 ; mod <letter>
+ * mod encoding (xterm style): shift=2, alt=3, ctrl=5
+ * combos: shift+alt=4, ctrl+shift=6, ctrl+alt=7, ctrl+shift+alt=8
+ */
+static void write_ansi_csi(Window *win, const char *letter, int mod)
+{
+    if (mod == 0) {
+        char buf[8];
+        snprintf(buf, sizeof(buf), "\x1b[%s", letter);
+        pty_write_str(win->pty, buf);
+    } else {
+        int m = 1;
+        if (mod & MOD_SHIFT) m += 1;
+        if (mod & MOD_ALT)   m += 2;
+        if (mod & MOD_CTRL)  m += 4;
+        char buf[16];
+        snprintf(buf, sizeof(buf), "\x1b[1;%d%s", m, letter);
+        pty_write_str(win->pty, buf);
+    }
+}
+
 void wm_handle_event(const Event *ev)
 {
     Window *f = wm_focused();
@@ -129,6 +157,52 @@ void wm_handle_event(const Event *ev)
         } else if (key == K_ESC) {
             c = '\x1b';
             pty_write(f->pty, &c, 1);
+        }
+
+        /* arrow keys — send ANSI escape sequences */
+        else if (key == K_UP)    write_ansi_csi(f, "A", ev->key.mod);
+        else if (key == K_DOWN)  write_ansi_csi(f, "B", ev->key.mod);
+        else if (key == K_RIGHT) write_ansi_csi(f, "C", ev->key.mod);
+        else if (key == K_LEFT)  write_ansi_csi(f, "D", ev->key.mod);
+
+        /* navigation keys */
+        else if (key == K_HOME)  write_ansi_csi(f, "H", ev->key.mod);
+        else if (key == K_END)   write_ansi_csi(f, "F", ev->key.mod);
+        else if (key == K_PGUP)  pty_write_str(f->pty, "\x1b[5~");
+        else if (key == K_PGDN)  pty_write_str(f->pty, "\x1b[6~");
+
+        /* ctrl + printable: map to control characters */
+        else if ((ev->key.mod & MOD_CTRL) && key >= 'a' && key <= 'z') {
+            c = (char)(key - 'a' + 1);
+            pty_write(f->pty, &c, 1);
+        }
+        else if ((ev->key.mod & MOD_CTRL) && key >= 'A' && key <= 'Z') {
+            c = (char)(key - 'A' + 1);
+            pty_write(f->pty, &c, 1);
+        }
+        /* ctrl + other: common mappings */
+        else if ((ev->key.mod & MOD_CTRL) && key == ' ') {
+            c = '\0';  /* ctrl-space -> NUL */
+            pty_write(f->pty, &c, 1);
+        }
+        else if ((ev->key.mod & MOD_CTRL) && key == '/') {
+            c = '\x1f';  /* ctrl-/ -> US */
+            pty_write(f->pty, &c, 1);
+        }
+        else if ((ev->key.mod & MOD_CTRL) && key == '[') {
+            c = '\x1b';  /* ctrl-[ -> ESC */
+            pty_write(f->pty, &c, 1);
+        }
+        else if ((ev->key.mod & MOD_CTRL) && key == '\\') {
+            c = '\x1c';  /* ctrl-\ -> FS */
+            pty_write(f->pty, &c, 1);
+        }
+
+        /* function keys F1-F12 */
+        else if (key >= K_F1 && key <= K_F12) {
+            char buf[8];
+            snprintf(buf, sizeof(buf), "\x1b[%d~", key - K_F1 + 11);
+            pty_write_str(f->pty, buf);
         }
         /* TODO: handle arrow keys, ctrl combos, etc. */
     }
