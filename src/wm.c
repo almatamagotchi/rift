@@ -206,4 +206,14 @@ void wm_handle_event(const Event *ev)
         }
         /* TODO: handle arrow keys, ctrl combos, etc. */
     }
+    else if (ev->type == EV_MOUSE_WHEEL_UP) {
+        /* scroll up: send up-arrow a few times */
+        for (int i = 0; i < 3; i++)
+            pty_write_str(f->pty, "\x1b[A");
+    }
+    else if (ev->type == EV_MOUSE_WHEEL_DOWN) {
+        /* scroll down: send down-arrow */
+        for (int i = 0; i < 3; i++)
+            pty_write_str(f->pty, "\x1b[B");
+    }
 }
