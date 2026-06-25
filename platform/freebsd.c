@@ -7,16 +7,25 @@
 
 #include "../src/common.h"
 
+/* common.h defines _POSIX_C_SOURCE which hides BSD types in sys/consio.h.
+   work around it with explicit includes and a cfmakeraw prototype */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <termios.h>
-#include <sys/types.h>
+
+/* sys/consio.h needs BSD types that _POSIX_C_SOURCE hides */
+typedef unsigned short u_short;
+typedef unsigned char  u_char;
+
 #include <sys/ioctl.h>
 #include <sys/consio.h>
 #include <sys/mouse.h>
+
+/* cfmakeraw is hidden by _POSIX_C_SOURCE — declare explicitly */
+void cfmakeraw(struct termios *);
 
 static struct termios orig_termios;
 static int term_cols, term_rows;
