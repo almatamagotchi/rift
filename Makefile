@@ -32,7 +32,7 @@ ifeq ($(platform),linux)
     endif
 else ifeq ($(platform),freebsd)
     SRCS  += $(PLAT_DIR)/freebsd.c
-    CFLAGS += -DRIFT_PLATFORM_FREEBSD -D_DEFAULT_SOURCE
+    CFLAGS += -DRIFT_PLATFORM_FREEBSD -std=gnu11
 else
     $(error Unknown platform: $(platform). Use make platform=linux or platform=freebsd)
 endif
