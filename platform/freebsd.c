@@ -13,6 +13,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <termios.h>
+#include <sys/types.h>
 #include <sys/ioctl.h>
 #include <sys/consio.h>
 #include <sys/mouse.h>
