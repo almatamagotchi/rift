@@ -34,7 +34,7 @@ static int mouse_fd = -1;
 int plat_init(void)
 {
     struct termios raw;
-    int cols, rows;
+    int cols = 0, rows = 0;
 
     /* get console size */
     if (ioctl(STDIN_FILENO, TIOCGWINSZ, &cols) == 0) {
