@@ -10,6 +10,7 @@
 #include <sys/ioctl.h>
 #include <sys/wait.h>
 #include <time.h>
+#include <signal.h>
 
 #ifdef __linux__
 #include <pty.h>       /* openpty */
